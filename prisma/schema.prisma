@@ -1,0 +1,53 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+
+
+model Ride{
+
+  id                          String @id @map("_id") @default(auto()) @db.ObjectId
+  name                        String
+  start_date                  DateTime
+  start_date_registration     DateTime
+  end_date_registration       DateTime
+  additonal_information       String?
+  start_place                 String
+  participants_limit          Int?
+
+
+  // Ride Participants
+  participants                RegisteredParticipant[]
+
+  // Ride Creator
+  ride_creator                User  @relation(fields: [ride_creator_id],references: [id])
+  ride_creator_id             String @db.ObjectId
+
+}
+
+model RegisteredParticipant{
+    id                          String @id @map("_id") @default(auto()) @db.ObjectId
+    subscription_date           DateTime @default(now())
+    ride_id                     String @db.ObjectId
+    ride                        Ride @relation(fields: [ride_id],references: [id])
+    user_id                     String @db.ObjectId
+    user                        User @relation(fields: [user_id],references: [id])
+}
+
+model User{
+    id                          String @id @map("_id") @default(auto()) @db.ObjectId
+    name                        String
+    email                       String @unique
+    password                    String
+    registered_rides            RegisteredParticipant[]
+    created_rides               Ride[]
+
+}
